@@ -30,4 +30,49 @@ class ApplicationController < Sinatra::Base
       redirect '/failure'
     end
   end
-end 
+
+  # get '/account' renders an account.erb page, which should be displayed once a user successfully logs in.
+  get '/account' do
+    @user = User.find(session[:user_id])
+    erb :account
+  end
+
+  # get '/login' renders a form for logging in.
+  get "/login" do
+    erb :login
+  end
+
+  post "/login" do
+    user = User.find_by(:username => params[:username])
+
+    if user && user.authenticate(params[:password])
+      session[:user_id] = user.id
+      redirect to '/account'
+    else
+      redirect to '/failure'
+    end
+  end
+
+  # get '/failure' renders a failure.erb page. This will be accessed if there is an error logging in or signing up.
+  get "/failure" do
+    erb :failure
+  end
+
+  # get '/logout' clears the session data and redirects to the home page.
+  get "/logout" do
+    session.clear
+    redirect "/"
+  end
+
+  # specifically designed to control logic in our views
+  helpers do
+    def logged_in?
+      !!session[:user_id]
+    end
+
+    def current_user
+      User.find(session[:user_id])
+    end
+  end
+
+end
