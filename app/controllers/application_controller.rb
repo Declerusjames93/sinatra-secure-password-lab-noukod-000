@@ -8,50 +8,25 @@ class ApplicationController < Sinatra::Base
     set :session_secret, "password_security"
   end
 
+  # get "/" do renders an index.erb file with links to signup or login.
   get "/" do
     erb :index
   end
 
+  # get '/account' renders an account.erb page, which should be displayed once a user successfully logs in.
   get "/signup" do
     erb :signup
   end
 
   post "/signup" do
-    #your code here
-
-  end
-
-  get '/account' do
-    @user = User.find(session[:user_id])
-    erb :account
-  end
-
-
-  get "/login" do
-    erb :login
-  end
-
-  post "/login" do
-    ##your code here
-  end
-
-  get "/failure" do
-    erb :failure
-  end
-
-  get "/logout" do
-    session.clear
-    redirect "/"
-  end
-
-  helpers do
-    def logged_in?
-      !!session[:user_id]
+    if params[:username].empty?
+      redirect to '/failure'
     end
 
-    def current_user
-      User.find(session[:user_id])
+    user = User.new(:username => params[:username], :password => params[:password])
+    if user.save
+      redirect '/login'
+    else
+      redirect '/failure'
     end
   end
-
-end
